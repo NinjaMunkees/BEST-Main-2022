@@ -8,188 +8,151 @@
 const int MaxStickPos = 127;
 const int DeadZone = 10;             //Deadzone for joysticks
 
-/*
- * task Chassis() //Task for drive-train
-{
-    *
-    *Assigns variables to read joysticks and apply
-    *a slope calculation for a ramp-up of acceleration
-    *
-
-    int LeftDriveStick = (vexRT[Ch3] * abs(vexRT[Ch3])) / 127;
-    int RightDriveStick = (vexRT[Ch2] * abs(vexRT[Ch2])) / 127;
-
-    if(abs(LeftDriveStick) < 5)
-    {
-    LeftDriveStick = 0;
-    }
-    else if(abs(LeftDriveStick) > maxStickPos){
-    LeftDriveStick = (MaxStickPos * (LeftDriveStick / (abs(LeftDriveStick)))
-    }
-
-    if(abs(RightDriveStick) < 5)
-    {
-    RightDriveStick = 0;
-    }
-    else if(abs(RightDriveStick) > maxStickPos){
-    RightDriveStick = (MaxStickPos * (RightDriveStick / (abs(RightDriveStick)))
-    }
-    else
-    {
-    motor[LMotor] = LeftDriveStick * -1;	//Send values to the motors
-    motor[RMotor] = RightDriveStick * -1;
-    }
-
-}
- */
-
 task Chassis()
 {
 	//float LeftDriveStick, RightDriveStick;	//Variables for calculating
 	while (true)
 	{
 
-        float LeftDriveStick = (vexRT[Ch3] * abs(vexRT[Ch3])) / MaxStickPos;	//Slope calculation for smooth speed increase
-        float RightDriveStick = (vexRT[Ch2] * abs(vexRT[Ch2])) / MaxStickPos;
+		float LeftDriveStick = (vexRT[Ch3] * abs(vexRT[Ch3])) / MaxStickPos;	//Slope calculation for smooth speed increase
+		float RightDriveStick = (vexRT[Ch2] * abs(vexRT[Ch2])) / MaxStickPos;
 
-        if(abs(LeftDriveStick) < DeadZone)	//To account for joystick misalignment
+		if(LeftDriveStick < DeadZone && LeftDriveStick > -DeadZone)	//To account for joystick misalignment
 		{
 			LeftDriveStick = 0;
 		}
-        else if(LeftDriveStick > MaxStickPos)	//Crutches to ensure we don't overpower the motors
-        {
-            LeftDriveStick = MaxStickPos;
-        }
-        else if(LeftDriveStick < -MaxStickPos)
-        {
-            LeftDriveStick = -MaxStickPos;
-        }
+		else if(LeftDriveStick > MaxStickPos)	//Crutches to ensure we don't overpower the motors
+		{
+			LeftDriveStick = MaxStickPos;
+		}
+		else if(LeftDriveStick < -MaxStickPos)
+		{
+			LeftDriveStick = -MaxStickPos;
+		}
 
-        if(abs(RightDriveStick) < DeadZone)	//To account for joystick misalignment
+		if(RightDriveStick < DeadZone && RightDriveStick > -DeadZone)	//To account for joystick misalignment
 		{
 			RightDriveStick = 0;
 		}
-        else if(RightDriveStick > MaxStickPos)
-        {
-            RightDriveStick = MaxStickPos;
-        }
-        else if(ightDriveStick < -MaxStickPos)
-        {
-            RightDriveStick = -MaxStickPos;
-        }
+		else if(RightDriveStick > MaxStickPos)
+		{
+			RightDriveStick = MaxStickPos;
+		}
+		else if(RightDriveStick < -MaxStickPos)
+		{
+			RightDriveStick = -MaxStickPos;
+		}
 
-        motor[LDrive] = LeftDriveStick;	//Send the values to the motors
-        motor[RDrive] = RightDriveStick;
+		motor[LDrive] = LeftDriveStick;	//Send the values to the motors
+		motor[RDrive] = RightDriveStick;
 	}
 }
 
-const int HomePos = -100;
+const int HomePos = 0;
 
 task SqueakyMode() //Control mode for squeaky
 {
-    //Servo Positions
-	const int MaxPos = 255;         //Full forward position
-	const int RevPos = 0;     //Full backwards position
-	const int HalfPos = 30;         //Half-way position either way
-    const int RevHalfPos = -30;
+	//Servo Positions
+	const int MaxPos = 127;         //Full forward position
+	const int RevPos = -127;     //Full backwards position
+	const int HalfPos = 60;         //Half-way position either way
+	const int RevHalfPos = -60;
 
-    //Servo states
-    int DriveServoState = 0;
-    int ArmServoState = 0;
-    int RotateServoState = 0;
+	//Servo states
+	int DriveServoState = 0;
+	int ArmServoState = 0;
+	int RotateServoState = 0;
 
-    //Joystick values to set servo position
-    const int MidControlLimit = 110;      //Max thumbstick range
-    
+	//Joystick values to set servo position
+	const int MidControlLimit = 100;      //Max thumbstick range
 
-    /*
-    * Checks current position of each joystick,
-    * first checking if we have exceeded our dead-zone,
-    * then if the joystick is in our full power
-    * position or half power position,
-    * then finally checking if it has returned to our 
-    * starting position when the joystick is released.
-    */
+	/*
+	* Checks current position of each joystick,
+	* first checking if we have exceeded our dead-zone,
+	* then if the joystick is in our full power
+	* position or half power position,
+	* then finally checking if it has returned to our
+	* starting position when the joystick is released.
+	*/
 
+	while(true)
+	{
+		//Joystick axis mapping
+		int DriveControl = vexRT[Ch2];
+		int ArmControl = vexRT[Ch3];
+		int RotateControl = vexRT[Ch4];
 
-    while(true)
-    {
-        //Joystick axis mapping
-        int DriveControl = vexRT[Ch2];
-        int ArmControl = vexRT[Ch3];
-        int RotateControl = vexRT[Ch4];
+		//Section for moving Squeaky
+		if(abs(DriveControl) < DeadZone)
+		{
+			DriveServoState = HomePos;
+		}
+		else if(DriveControl > DeadZone && DriveControl < MidControlLimit)
+		{
+			DriveServoState = HalfPos;
+		}
+		else if(DriveControl < -DeadZone && DriveControl > -MidControlLimit)
+		{
+			DriveServoState = -HalfPos;
+		}
+		else if(DriveControl >= MidControlLimit)
+		{
+			DriveServoState = MaxPos;
+		}
+		else if(DriveControl <= -MidControlLimit)
+		{
+			DriveServoState = RevPos;
+		}
 
-        //Section for moving Squeaky
-        if(abs(DriveControl) < DeadZone)
-        {
-            DriveServoState = HomePos;
-        }
-        else if(DriveControl > DeadZone && DriveControl < MidControlLimit)
-        {
-            DriveServoState = HalfPos;
-        }
-        else if(DriveControl < -DeadZone && DriveControl > -MidControlLimit)
-        {
-            DriveServoState = -HalfPos;
-        }
-        else if(DriveControl >= MidControlLimit)
-        {
-            DriveServoState = MaxPos;
-        }
-        else if(DriveControl <= -MidControlLimit)
-        {
-            DriveServoState = RevPos;
-        }
+		//Section for moving Squeaky's arm
+		if(abs(ArmControl) < DeadZone)
+		{
+			ArmServoState = HomePos;
+		}
+		else if(ArmControl > DeadZone && ArmControl < MidControlLimit)
+		{
+			ArmServoState = HalfPos;
+		}
+		else if(ArmControl < -DeadZone && ArmControl > -MidControlLimit)
+		{
+			ArmServoState = -HalfPos;
+		}
+		else if(ArmControl >= MidControlLimit)
+		{
+			ArmServoState = MaxPos;
+		}
+		else if(ArmControl <= -MidControlLimit)
+		{
+			ArmServoState = RevPos;
+		}
 
-        //Section for moving Squeaky's arm
-        if(abs(ArmControl) < DeadZone)
-        {
-            ArmServoState = HomePos;
-        }
-        else if(ArmControl > DeadZone && ArmControl < MidControlLimit)
-        {
-            ArmServoState = HalfPos;
-        }
-        else if(ArmControl < -DeadZone && ArmControl > -MidControlLimit)
-        {
-            ArmServoState = -HalfPos;
-        }
-        else if(ArmControl >= MidControlLimit)
-        {
-            ArmServoState = MaxPos;
-        }
-        else if(ArmControl <= -MidControlLimit)
-        {
-            ArmServoState = RevPos;
-        }
+		//Section for rotating Squeaky's arm
+		if(abs(RotateControl) < DeadZone)
+		{
+			RotateServoState = HomePos;
+		}
+		else if(RotateControl > DeadZone && RotateControl < MidControlLimit)
+		{
+			RotateServoState = HalfPos;
+		}
+		else if(RotateControl < -DeadZone && RotateControl > -MidControlLimit)
+		{
+			RotateServoState = RevHalfPos;
+		}
+		else if(RotateControl >= MidControlLimit)
+		{
+			RotateServoState = MaxPos;
+		}
+		else if(RotateControl <= -MidControlLimit)
+		{
+			RotateServoState = RevPos;
+		}
 
-        //Section for rotating Squeaky's arm
-        if(abs(RotateControl) < DeadZone)
-        {
-            RotateServoState = HomePos;
-        }
-        else if(RotateControl > DeadZone && RotateControl < MidControlLimit)
-        {
-            RotateServoState = HalfPos;
-        }
-        else if(RotateControl < -DeadZone && RotateControl > -MidControlLimit)
-        {
-            RotateServoState = -HalfPos;
-        }
-        else if(RotateControl >= MidControlLimit)
-        {
-            RotateServoState = MaxPos;
-        }
-        else if(RotateControl <= -MidControlLimit)
-        {
-            RotateServoState = RevPos;
-        }
-
-        //Sets our servo positions bsed on previous variable assignments
-        motor[DriveServo] = DriveServoState;
-        motor[ArmServo] = ArmServoState;
-        motor[RotateServo] = RotateServoState;
-    }
+		//Sets our servo positions bsed on previous variable assignments
+		motor[DriveServo] = DriveServoState;
+		motor[ArmServo] = ArmServoState;
+		motor[RotateServo] = RotateServoState;
+	}
 }
 
 const int StartPos = -70;
@@ -199,7 +162,7 @@ task main()
 	startTask(Chassis);
 	bool IsSqueakyModeRunning = false;
 	while(true)
-    {
+	{
 		if(vexRT[Btn5D] == true && !IsSqueakyModeRunning){
 			stopTask(Chassis);
 			startTask(SqueakyMode);
@@ -210,9 +173,9 @@ task main()
 			startTask(Chassis);
 			IsSqueakyModeRunning = false;
 
-            motor[DriveServo] = StartPos;
-            motor[ArmServo] = StartPos;
-            motor[RotateServo] = StartPos;
+			motor[DriveServo] = StartPos;
+			motor[ArmServo] = StartPos;
+			motor[RotateServo] = StartPos;
 		}
 	}
 }

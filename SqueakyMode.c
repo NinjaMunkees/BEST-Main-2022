@@ -20,8 +20,8 @@ task Chassis()
 		float RightStick = vexRT[Ch2];
 
 		//Slope calculation for smooth speed increase
-		float RightDriveStick = 0;
-		float LeftDriveStick = 0;
+		float RightDriveStick;
+		float LeftDriveStick;
 
 		if(fabs(LeftStick) < DeadZone)
 		{
@@ -66,9 +66,9 @@ task SqueakyMode() //Control mode for squeaky
 	const int RevHalfPos = -60;
 
 	//Servo states
-	int DriveServoState = 0;
-	int ArmServoState = 0;
-	int RotateServoState = 0;
+	int DriveServoState;
+	int ArmServoState;
+	int RotateServoState;
 
 	//Joystick values to set servo position
 	const int MidControlLimit = 100;      //Max thumbstick range

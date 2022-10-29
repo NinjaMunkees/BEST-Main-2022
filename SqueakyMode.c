@@ -162,8 +162,6 @@ task SqueakyMode() //Control mode for squeaky
 	}
 }
 
-const int StartPos = -70;
-
 task main()
 {
 	startTask(Chassis);
@@ -180,9 +178,9 @@ task main()
 			startTask(Chassis);
 			IsSqueakyModeRunning = false;
 
-			motor[DriveServo] = StartPos;
-			motor[ArmServo] = StartPos;
-			motor[RotateServo] = StartPos;
+			motor[DriveServo] = HomePos;
+			motor[ArmServo] = HomePos;
+			motor[RotateServo] = HomePos;
 		}
 	}
 }

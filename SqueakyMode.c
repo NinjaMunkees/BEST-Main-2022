@@ -234,23 +234,20 @@ task SqueakyMode() //Control mode for squeaky
 task main()
 {
 	startTask(Chassis);
-	bool SqueakyModeActive = false;
 
 	setBaud(UART1, 600);
 
 	while(true)
 	{
-		if(vexRT[Btn5D] == true && !SqueakyModeActive){
+		if(vexRT[Btn5D]){
 			stopTask(Chassis);
 			startTask(IRSetup);
 			startTask(SqueakyMode);
-			SqueakyModeActive = true;
 		}
-		else if(vexRT[Btn6D] == true && SqueakyModeActive){
+		else if(vexRT[Btn6D]){
 			stopTask(SqueakyMode);
 			stopTask(IRSetup);
 			startTask(Chassis);
-			SqueakyModeActive = false;
 
 			motor[DriveServo] = HomePos;
 			motor[ArmServo] = HomePos;

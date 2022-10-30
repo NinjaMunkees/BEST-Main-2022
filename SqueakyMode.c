@@ -65,7 +65,7 @@ const int MaxStickPos = 127;
 const int DeadZone = 25;             //Deadzone for joysticks
 const int DriveAddition = 20;
 
-task Chassis()
+task Chassis() //Drive code
 {
 	//float LeftDriveStick, RightDriveStick;	//Variables for calculating
 	while (true)
@@ -77,7 +77,13 @@ task Chassis()
 		float RightDriveStick = 0;
 		float LeftDriveStick = 0;
 
-		if(fabs(LeftStick) < DeadZone)
+		/*
+		*The next two sections check if we exceed our deadzone
+		*if so it then checks if we have exceeded our maximum desired ouput
+		*if we haven't it performs our drive calculations
+		*/
+
+		if(fabs(LeftStick) < DeadZone) 
 		{
 			LeftDriveStick = 0;
 		}
@@ -109,10 +115,12 @@ task Chassis()
 	}
 }
 
-const int IRCycleGoal = 20;
+const int IRCycleGoal = 20; //Amount of llops for us to send IR values
 
 task IRSetup()
 {
+	//Sends IR values for the desired number of cycles
+
 	for (i = 0; i < IRCycleGoal; i++)
 	{
 		sendChar( UART1, 0xF0); //Tests IR connection
@@ -233,21 +241,23 @@ task SqueakyMode() //Control mode for squeaky
 
 task main()
 {
-	startTask(Chassis);
+	startTask(Chassis); //Starts drive task
 
-	setBaud(UART1, 600);
+	setBaud(UART1, 600); //Sets baud rate
 
 	while(true)
 	{
 		if(vexRT[Btn5D]){
-			stopTask(Chassis);
-			startTask(IRSetup);
-			startTask(SqueakyMode);
+			stopTask(Chassis); //Exits our drive task
+			startTask(IRSetup); //Runs IR Setup
+			startTask(SqueakyMode); //Starts SqueakyMode
 		}
 		else if(vexRT[Btn6D]){
-			stopTask(SqueakyMode);
-			stopTask(IRSetup);
-			startTask(Chassis);
+			stopTask(SqueakyMode); //Exits SqueakyMode
+			stopTask(IRSetup); //Quits IR setup
+			startTask(Chassis); //Starts drive task
+
+			//Resets oiur servos to a homed position
 
 			motor[DriveServo] = HomePos;
 			motor[ArmServo] = HomePos;

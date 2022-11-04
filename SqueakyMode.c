@@ -83,7 +83,7 @@ task Chassis() //Drive code
 		*if we haven't it performs our drive calculations
 		*/
 
-		if(fabs(LeftStick) < DeadZone) 
+		if(fabs(LeftStick) < DeadZone)
 		{
 			LeftDriveStick = 0;
 		}
@@ -121,20 +121,20 @@ task IRSetup()
 {
 	//Sends IR values for the desired number of cycles
 
-	for (i = 0; i < IRCycleGoal; i++)
+	for (int i = 0; i < IRCycleGoal; i++)
 	{
 		sendChar( UART1, 0xF0); //Tests IR connection
 		sendChar( UART1, 0xAA); //Resets squeaky
 	}
 
-	for (i = 0; i < IRCycleGoal; i++)
+	for (int i = 0; i < IRCycleGoal; i++)
 	{
 		sendChar( UART1, 0xC3); //Sets squeaky drive speed to high
 		sendChar( UART1, 0x0F); //Sets squeaky rotation speed to high
 	}
 }
 
-const int HomePos = 0;
+const int HomePos = 20;
 
 task SqueakyMode() //Control mode for squeaky
 {
@@ -191,7 +191,7 @@ task SqueakyMode() //Control mode for squeaky
 		//Section for moving Squeaky's arm
 		if(abs(ArmControl) < DeadZone)
 		{
-			ArmServoState = HomePos;
+			ArmServoState = -HomePos;
 		}
 		else if(ArmControl > DeadZone && ArmControl < MidControlLimit)
 		{
@@ -213,7 +213,7 @@ task SqueakyMode() //Control mode for squeaky
 		//Section for rotating Squeaky's arm
 		if(abs(RotateControl) < DeadZone)
 		{
-			RotateServoState = HomePos;
+			RotateServoState = -HomePos;
 		}
 		else if(RotateControl > DeadZone && RotateControl < MidControlLimit)
 		{
@@ -221,7 +221,7 @@ task SqueakyMode() //Control mode for squeaky
 		}
 		else if(RotateControl < -DeadZone && RotateControl > -MidControlLimit)
 		{
-			RotateServoState = RevHalfPos;
+			RotateServoState = -HalfPos;
 		}
 		else if(RotateControl >= MidControlLimit)
 		{
@@ -260,8 +260,8 @@ task main()
 			//Resets oiur servos to a homed position
 
 			motor[DriveServo] = HomePos;
-			motor[ArmServo] = HomePos;
-			motor[RotateServo] = HomePos;
+			motor[ArmServo] = -HomePos;
+			motor[RotateServo] = -HomePos;
 		}
 	}
 }

@@ -63,7 +63,8 @@ void setBaud( const TUARTs nPort, int baudRate ) {
 
 const int MaxStickPos = 127;
 const int DeadZone = 25;             //Deadzone for joysticks
-const int DriveAddition = 20;
+const int DriveAddition = 10;
+const int DriveMultiplier = 1.1;
 
 task Chassis() //Drive code
 {
@@ -93,7 +94,7 @@ task Chassis() //Drive code
 		}
 		else
 		{
-			LeftDriveStick = (LeftStick * fabs(LeftStick)) / MaxStickPos + DriveAddition * sgn(LeftStick);
+			LeftDriveStick = (LeftStick * fabs(LeftStick)) / MaxStickPos + DriveAddition * sgn(LeftStick) * DriveMultiplier;
 		}
 
 		if(fabs(RightStick) < DeadZone)
@@ -106,7 +107,7 @@ task Chassis() //Drive code
 		}
 		else
 		{
-			RightDriveStick = (RightStick * fabs(RightStick)) / MaxStickPos + DriveAddition * sgn(RightStick);
+			RightDriveStick = (RightStick * fabs(RightStick)) / MaxStickPos + DriveAddition * sgn(RightStick) * DriveMultiplier;
 		}
 
 		//Sends values to motors

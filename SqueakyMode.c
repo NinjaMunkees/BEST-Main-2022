@@ -12,20 +12,20 @@ typedef unsigned short uint16_t;
 
 typedef struct
 {
-  uint16_t SR;
-  uint16_t RESERVED0;
-  uint16_t DR;
-  uint16_t RESERVED1;
-  uint16_t BRR;
-  uint16_t RESERVED2;
-  uint16_t CR1;
-  uint16_t RESERVED3;
-  uint16_t CR2;
-  uint16_t RESERVED4;
-  uint16_t CR3;
-  uint16_t RESERVED5;
-  uint16_t GTPR;
-  uint16_t RESERVED6;
+	uint16_t SR;
+	uint16_t RESERVED0;
+	uint16_t DR;
+	uint16_t RESERVED1;
+	uint16_t BRR;
+	uint16_t RESERVED2;
+	uint16_t CR1;
+	uint16_t RESERVED3;
+	uint16_t CR2;
+	uint16_t RESERVED4;
+	uint16_t CR3;
+	uint16_t RESERVED5;
+	uint16_t GTPR;
+	uint16_t RESERVED6;
 } USART_TypeDef;
 
 /* Peripheral memory map */
@@ -37,27 +37,27 @@ typedef struct
 #define USART3                ((USART_TypeDef *) USART3_BASE)
 
 void setBaud( const TUARTs nPort, int baudRate ) {
-    uint32_t tmpreg = 0x00, apbclock = 0x00;
-    uint32_t integerdivider = 0x00;
-    uint32_t fractionaldivider = 0x00;
+	uint32_t tmpreg = 0x00, apbclock = 0x00;
+	uint32_t integerdivider = 0x00;
+	uint32_t fractionaldivider = 0x00;
 
-    /* pclk1 - 36MHz */
-    apbclock = 36000000;
+	/* pclk1 - 36MHz */
+	apbclock = 36000000;
 
-    /* Determine the integer part */
-    integerdivider = ((0x19 * apbclock) / (0x04 * (baudRate)));
-    tmpreg = (integerdivider / 0x64) << 0x04;
+	/* Determine the integer part */
+	integerdivider = ((0x19 * apbclock) / (0x04 * (baudRate)));
+	tmpreg = (integerdivider / 0x64) << 0x04;
 
-    /* Determine the fractional part */
-    fractionaldivider = integerdivider - (0x64 * (tmpreg >> 0x04));
-    tmpreg |= ((((fractionaldivider * 0x10) + 0x32) / 0x64)) & 0x0F;
+	/* Determine the fractional part */
+	fractionaldivider = integerdivider - (0x64 * (tmpreg >> 0x04));
+	tmpreg |= ((((fractionaldivider * 0x10) + 0x32) / 0x64)) & 0x0F;
 
-    /* Write to USART BRR */
-    USART_TypeDef *uart = USART2;
-    if( nPort == UART2 ) {
-      uart = USART3;
-    }
-    uart->BRR = (uint16_t)tmpreg;
+	/* Write to USART BRR */
+	USART_TypeDef *uart = USART2;
+	if( nPort == UART2 ) {
+		uart = USART3;
+	}
+	uart->BRR = (uint16_t)tmpreg;
 }
 
 const int MaxStickPos = 127;		 //Max value for thumb-sticks & used for upper-range drive calc
@@ -98,7 +98,7 @@ task Chassis() //Drive code
 		{
 			if (LeftDriveStick < DriveCalcSwap)
 			{
-				LeftDriveStick = LeftDriveStick / 2.3
+				LeftDriveStick = LeftStick / 2.3;
 			}
 			else
 			{
@@ -118,7 +118,7 @@ task Chassis() //Drive code
 		{
 			if (RightDriveStick < DriveCalcSwap)
 			{
-				RightDriveStick= RightDriveStick / 2.3
+				RightDriveStick = RightStick / 2.3;
 			}
 			else
 			{
@@ -132,22 +132,13 @@ task Chassis() //Drive code
 	}
 }
 
-const int IRCycleGoal = 20; //Amount of llops for us to send IR values
-
 task IRSetup()
 {
-	//Sends IR values for the desired number of cycles
-
-	for (int i = 0; i < IRCycleGoal; i++)
-	{
-		sendChar( UART1, 0xF0); //Tests IR connection
-		sendChar( UART1, 0xAA); //Resets squeaky
-	}
-
-	for (int i = 0; i < IRCycleGoal; i++)
-	{
+	while (true){
+		//Sends IR values for the desired number of cycles
 		sendChar( UART1, 0xC3); //Sets squeaky drive speed to high
 		sendChar( UART1, 0x0F); //Sets squeaky rotation speed to high
+		wait1Msec(250);
 	}
 }
 
@@ -249,7 +240,7 @@ task SqueakyMode() //Control mode for squeaky
 			RotateServoState = -MaxPos;
 		}
 
-		//Sets our servo positions bsed on previous variable assignments
+		//Sets our servo positions based on previous variable assignments
 		motor[DriveServo] = DriveServoState;
 		motor[ArmServo] = ArmServoState;
 		motor[RotateServo] = RotateServoState;

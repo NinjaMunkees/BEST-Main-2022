@@ -98,7 +98,7 @@ task Chassis() //Drive code
 		{
 			if (LeftDriveStick < DriveCalcSwap)
 			{
-				LeftDriveStick = LeftDriveStick / 2.3
+				LeftDriveStick = LeftStick / 2.3;
 			}
 			else
 			{
@@ -118,7 +118,7 @@ task Chassis() //Drive code
 		{
 			if (RightDriveStick < DriveCalcSwap)
 			{
-				RightDriveStick= RightDriveStick / 2.3
+				RightDriveStick = RightStick / 2.3;
 			}
 			else
 			{
@@ -132,22 +132,13 @@ task Chassis() //Drive code
 	}
 }
 
-const int IRCycleGoal = 20; //Amount of llops for us to send IR values
-
 task IRSetup()
 {
-	//Sends IR values for the desired number of cycles
-
-	for (int i = 0; i < IRCycleGoal; i++)
-	{
-		sendChar( UART1, 0xF0); //Tests IR connection
-		sendChar( UART1, 0xAA); //Resets squeaky
-	}
-
-	for (int i = 0; i < IRCycleGoal; i++)
-	{
+	while (true){
+		//Sends IR values for the desired number of cycles
 		sendChar( UART1, 0xC3); //Sets squeaky drive speed to high
 		sendChar( UART1, 0x0F); //Sets squeaky rotation speed to high
+		wait1Msec(250);
 	}
 }
 
@@ -249,7 +240,7 @@ task SqueakyMode() //Control mode for squeaky
 			RotateServoState = -MaxPos;
 		}
 
-		//Sets our servo positions bsed on previous variable assignments
+		//Sets our servo positions based on previous variable assignments
 		motor[DriveServo] = DriveServoState;
 		motor[ArmServo] = ArmServoState;
 		motor[RotateServo] = RotateServoState;
